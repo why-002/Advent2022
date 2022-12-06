@@ -54,7 +54,7 @@ def original(stack_from, stack_to, num_moved):
         stacklist[stack_to].objects.append(stacklist[stack_from].objects.pop())
 
 
-s = map(original, r[0], r[1], r[2])
+s = map(original, *r)
 list(s)
 print(''.join([i.objects[-1] for i in stacklist]))
 
@@ -67,6 +67,6 @@ def new(stack_from, stack_to, num_moved):
         stacklist2[stack_to].objects.append(stacklist2[stack_from].objects.pop(-moved))
 
 
-s = map(new, r[0], r[1], r[2])
+s = map(new, *r)
 list(s)
 print(''.join([i.objects[-1] for i in stacklist2]))
