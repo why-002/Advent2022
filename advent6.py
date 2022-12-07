@@ -7,19 +7,12 @@ def is_unique(string):
     return len({i for i in string}) == len(string)
 
 
-def find_key(file):
+def find_start(file, num):
     for index, char in enumerate(file):
-        potential_key = file[index:index + 4]
+        potential_key = file[index:index + num]
         if is_unique(potential_key):
-            return index+4
-
-def find_start_of_message(file):
-    for index, char in enumerate(file):
-        potential_key = file[index:index + 14]
-        for i in potential_key:
-            if is_unique(potential_key):
-                return index+14
+            return index + num
 
 
-print(find_key(file))
-print(find_start_of_message(file))
+print(find_start(file, 4))
+print(find_start(file, 14))
