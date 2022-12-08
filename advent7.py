@@ -43,35 +43,35 @@ class Directory:
             sum_size += i.get_size()
         return sum_size
 
-
-with open('input7.txt', 'r') as fp:
-    set_dir = Directory('/')
-    for line in fp:
-        line = line.strip().split(' ')
-        if line[0] == '$':
-            if line[1] == 'cd':
-                if line[-1] == '..':
-                    set_dir = set_dir.owner
-                elif line[-1] in Directory.dir_list:
-                    set_dir = Directory.dir_list[line[-1]]
-                else:
-                    set_dir.add_file(Directory(line[-1]))
-                    set_dir = set_dir.objects[-1]
-            elif 'ls' in line:
-                pass
-        else:
-            if line[0] == 'dir':
-                set_dir.add_file(Directory(line[-1]))
+if __name__ == '__main__':
+    with open('input7.txt', 'r') as fp:
+        set_dir = Directory('/')
+        for line in fp:
+            line = line.strip().split(' ')
+            if line[0] == '$':
+                if line[1] == 'cd':
+                    if line[-1] == '..':
+                        set_dir = set_dir.owner
+                    elif line[-1] in Directory.dir_list:
+                        set_dir = Directory.dir_list[line[-1]]
+                    else:
+                        set_dir.add_file(Directory(line[-1]))
+                        set_dir = set_dir.objects[-1]
+                elif 'ls' in line:
+                    pass
             else:
-                set_dir.add_file(File(line[1], int(line[0])))
+                if line[0] == 'dir':
+                    set_dir.add_file(Directory(line[-1]))
+                else:
+                    set_dir.add_file(File(line[1], int(line[0])))
 
-total = [i.get_size() for i in Directory.dir_list if i.get_size() <= 100000]
-print(sum(total))
+    total = [i.get_size() for i in Directory.dir_list if i.get_size() <= 100000]
+    print(sum(total))
 
-num_needed = (30000000 - (70000000 - sum(i.get_size() for i in File.file_list)))
-d = [i.get_size() for i in Directory.dir_list]
-d.sort()
-for i in d:
-    if i > num_needed:
-        print(i)
-        break
+    num_needed = (30000000 - (70000000 - sum(i.get_size() for i in File.file_list)))
+    d = [i.get_size() for i in Directory.dir_list]
+    d.sort()
+    for i in d:
+        if i > num_needed:
+            print(i)
+            break
