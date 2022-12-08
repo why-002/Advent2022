@@ -4,13 +4,13 @@ nums = []
 
 
 class File:
-    file_dict = []
+    file_list = []
 
     def __init__(self, name, size):
         self.name = name
         self.size = size
         self.owner = None
-        File.file_dict.append(self)
+        File.file_list.append(self)
 
     def get_size(self):
         return self.size
@@ -67,3 +67,11 @@ with open('input7.txt', 'r') as fp:
 
 total = [i.get_size() for i in Directory.dir_list if i.get_size() <= 100000]
 print(sum(total))
+
+num_needed = (30000000 - (70000000 - sum(i.get_size() for i in File.file_list)))
+d = [i.get_size() for i in Directory.dir_list]
+d.sort()
+for i in d:
+    if i > num_needed:
+        print(i)
+        break
