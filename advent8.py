@@ -3,34 +3,37 @@ class Tree:
         self.height = int(height)
         self.x = x
         self.y = y
-        self.above = [int(i[x]) for i in forest[:y]] + [-1]
-        self.below = [int(i[x]) for i in forest[y + 1:]] + [-1]
-        self.left = [int(i) for i in forest[y][:x]] + [-1]
-        self.right = [int(i) for i in forest[y][x+1:]] + [-1]
-
-    def visible(self):
-        return (self.height > int(max(self.above))) or (self.height > int(max(self.below))) or (self.height > int(max(self.left))) or (self.height > int(max(self.right)))
-
-    def find_scenic_score(self):
-        l_list = [self.above,self.below,self.left, self.right]
-        for l in l_list:
-            l.remove(-1)
-            if l == []:
-                l.append(-1)
+        self.above = [int(i[x]) for i in forest[:y]]
+        self.below = [int(i[x]) for i in forest[y + 1:]]
+        self.left = [int(i) for i in forest[y][:x]]
+        self.right = [int(i) for i in forest[y][x + 1:]]
+        self.l_list = [self.above, self.below, self.left, self.right]
+        self.score = 0
+        self.factors = []
         self.above.reverse()
         self.left.reverse()
 
-        above_list, below_list, left_list, right_list = [], [], [], []
-        name_list = [above_list,below_list,left_list,right_list]
-        factors = []
-        for name_index,name in enumerate(name_list):
-            list_from = l_list[name_index]
-            factors.append([value for index, value in enumerate(list_from) if value > max(list_from[:index] + [0])])
+    def __repr__(self):
+        return str(self.height)
+    def __lt__(self, other):
+        return self.score < other.score
+
+    def visible(self):
+        try:
+            return (self.height > int(max(self.above))) or (self.height > int(max(self.below))) or (
+                        self.height > int(max(self.left))) or (self.height > int(max(self.right)))
+        except ValueError:
+            return True
+
+    def calculate_scenic_score(self):
+
+        for index, list_from in enumerate(self.l_list):
+            self.factors.append([value for index, value in enumerate(list_from) if max(list_from[:index] + [-1]) < self.height])
 
         total = 1
-        for fac in factors:
+        for fac in self.factors:
             total *= len(fac)
-        return total
+        self.score = total
 
 
 with open('input8.txt', 'r') as fp:
@@ -40,16 +43,22 @@ with open('input8.txt', 'r') as fp:
         l = []
         for index, value in enumerate(line):
             l.append(Tree(int(value), int(index), int(line_index), fp))
-        forest += l
-count = 0
-for i in forest:
-    if i.visible():
-        count += 1
-print(count)
-
-m = 0
-for i in forest:
-    i = i.find_scenic_score()
-    if i > m:
-        m = i
-print(m)
+        forest.append(l)
+    count = 0
+    for line in forest:
+        for i in line:
+            if i.visible():
+                count += 1
+    print(count)
+    print(forest)
+    m = Tree(0, 0, 0, [[]])
+    for line in forest:
+        for i in line:
+            if [] not in i.l_list:
+                i.calculate_scenic_score()
+                if m < i:
+                    m = i
+    print(m.score)
+    print(m)
+    print(*m.l_list, sep='\n')
+    print(m.factors)
