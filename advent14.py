@@ -87,8 +87,10 @@ def interpret_cave(filename: str) -> set:
         occupied = set()
         for line in fp:
             line = line.split()
+
             while '->' in line:
                 line.remove('->')
+
             try:
                 for index,point in enumerate(line):
 
@@ -108,6 +110,7 @@ def interpret_cave(filename: str) -> set:
                         upper = max((current_x, next_x)) + 1
                         for i in range(lower, upper):
                             occupied.add((i, current_y))
+
             except IndexError:
                 pass
         return occupied
