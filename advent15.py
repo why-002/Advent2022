@@ -1,16 +1,18 @@
 import multiprocessing
 
 
-def foo(string):
+def find_nums(string):
     return string.isdigit() or string == '-'
 
+
 def in_range(sensor, distance, point):
-    x_distance = sensor[0]-point[0]
-    y_distance = sensor[1]-point[1]
+    x_distance = sensor[0] - point[0]
+    y_distance = sensor[1] - point[1]
     if abs(x_distance) + abs(y_distance) <= distance:
         return True
     else:
         return False
+
 
 def interpret_file(fname: str):
     with open(fname, 'r') as fp:
@@ -21,10 +23,11 @@ def interpret_file(fname: str):
             line = line[1:]
             for index, value in enumerate(line):
                 # noinspection PyTypeChecker
-                line[index] = int(''.join(filter(foo, value)))
+                line[index] = int(''.join(filter(find_nums, value)))
 
             file.append(line)
     return file
+
 
 def find_originals(coordinates: list, abs=abs):
     sensors = []
@@ -41,8 +44,8 @@ def find_originals(coordinates: list, abs=abs):
     x_pool.sort()
     return sensors, beacons, distances, x_pool
 
-def use_beacons(y_target, sensors,beacons,distances, x_pool, abs=abs):
 
+def use_beacons(y_target, sensors, beacons, distances, x_pool, abs=abs):
     no_beacon = []
     for i in range(x_pool[0], x_pool[-1] + 1):
         if [i, y_target] in beacons:
@@ -66,11 +69,11 @@ def use_beacons(y_target, sensors,beacons,distances, x_pool, abs=abs):
 def find_lone_frequency(sensors, distances, min_val, max_val, abs=abs):
     possible = []
     for s, d in zip(sensors, distances):
-        for x in range(-d-1, d+2):
+        for x in range(-d - 1, d + 2):
             x_coord = s[0] + x
             if min_val <= x_coord <= max_val:
-                left_over = abs(d)-abs(x)
-                for y in [-left_over-1, left_over+1]:
+                left_over = abs(d) - abs(x)
+                for y in [-left_over - 1, left_over + 1]:
                     y_coord = s[1] + y
                     if min_val <= y_coord <= max_val:
                         possible.append([x_coord, y_coord])
@@ -80,22 +83,20 @@ def find_lone_frequency(sensors, distances, min_val, max_val, abs=abs):
 if __name__ == '__main__':
     coordinates = interpret_file('input15.txt')
     originals = find_originals(coordinates)
-    #line_ = use_beacons(2000000, originals[0], originals[1], originals[2], originals[3])
-    #print(len(line_))
+    # line_ = use_beacons(2000000, originals[0], originals[1], originals[2], originals[3])
+    # print(len(line_))
     possible = find_lone_frequency(originals[0], originals[2], 0, 4000000)
     print(possible)
     for i in possible:
         no_beacon = False
         for s, d in zip(originals[0], originals[2]):
-            if in_range(s,d,i):
+            if in_range(s, d, i):
                 no_beacon = True
             else:
                 pass
         if not no_beacon:
             print(i[0] * 4000000 + i[1])
             break
-
-
 
 # 4157653 too low
 
