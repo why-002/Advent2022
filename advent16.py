@@ -39,6 +39,7 @@ class Pipe:
         self.connections = []
         Pipe.pipe_list.append(self)
         self.distance = float('inf')
+        self.ordering = None
 
     def __lt__(self, other):
         return self.distance < other.distance
@@ -118,106 +119,37 @@ def find_final_pressure(starting, current_volcano, use):
     return pressure
 
 
-def attempt_two(starting, current_volcano):
-    order = []
-    pipes = [i.name for i in current_volcano.pipes if i.flow_rate != 0 and i.used is False]
-    results = {}
-    while pipes:
-        pipe_test = itertools.permutations(pipes, 2)
-        for p in pipe_test:
-            test = find_final_pressure(starting, current_volcano, order + list(p))
-            reverse_test = find_final_pressure(starting, current_volcano, order + list(p)[::-1])
-            results[p] = test if test >= reverse_test else 0
-
-        results = {i: j for i, j in results.items() if j != 0}
-        interp = [i[0] for i, j in results.items() if j != 0]
-        highest = None
-        counts = 0
-        for i in interp:
-            if interp.count(i) >= counts:
-                highest = i
-                counts = interp.count(i)
-        if len(pipes) == 1:
-            highest = pipes[0]
-
-        if highest is None:
-            break
-        order.append(highest)
-        current_volcano.pipe_dict[highest].used = True
-        pipes = [i.name for i in current_volcano.pipes if i.flow_rate != 0 and i.used is False]
-        results = {}
-
-    '''score = 0
-    combinator = itertools.permutations(results, len(results))
-    for comb in combinator:
-        comb = [i for i in comb]
-        current_score = find_final_pressure(starting, current_volcano, comb.copy())
-        if current_score > score:
-            print(comb)
-            score = current_score
-        print(score)'''
-    score = find_final_pressure('AA', current_volcano, order)
-    return score
+def graphical_attempt(starting:str, v:Volcano):
+    distances = v.set_distances('AA')
+    pipeset = set()
+    pipeorder = []
+    for pipe in Pipe.pipe_list:
+        try:
+            pipe.ordering = pipe.flow_rate / pipe.distance
+        except ZeroDivisionError:
+            pipe.ordering = 0
+        pipeset.add((pipe.name,pipe.ordering))
+    while pipeset:
+        remove = ('NaN', -1)
+        for i in pipeset:
+            remove = i if i[1] > remove[1] else remove
+        pipeorder.append(remove)
+        try:
+            pipeset.remove(remove)
+        except:
+            pass
+    return [i[0] for i in pipeorder]
 
 
-def brute(starting, current_volcano):
-    results = [i.name for i in current_volcano.pipes if i.flow_rate != 0]
-    combinator = itertools.permutations(results, 6)
-    score = 0
-    for comb in combinator:
-        comb = [i for i in comb]
-        current_score = find_final_pressure(starting, current_volcano, tuple(comb.copy()))
-        if current_score > score:
-            score = current_score
-    return score
-
-
-def attempt_3(starting, current_volcano, use=None):
-    if use is None:
-        use = []
-    try:
-        distances = current_volcano.set_distances(use[-1])
-    except IndexError:
-        distances = current_volcano.set_distances(starting)
-    vals = {}
-    for pipe in [i for i in current_volcano.pipes if distances[i.name] != 0]:
-            try:
-                vals[pipe.name] = (find_final_pressure(starting, current_volcano, tuple(use +[use[-1]]+ [pipe.name])) - find_final_pressure(starting, current_volcano, tuple(use + [use[-1]]))) / distances[pipe.name] ** 2
-            except IndexError:
-                vals[pipe.name] = (find_final_pressure(starting, current_volcano, tuple(use + [pipe.name])) - find_final_pressure(starting, current_volcano, tuple(use))) / distances[pipe.name] ** 2
-    vals = {i:j for i,j in vals.items() if i not in use}
-    for index, value in vals.items():
-        if value is max(vals.values()) and value != 0:
-            return [index] + attempt_3(starting,current_volcano,use + [index])
-    return []
-
-def funny_idea(current_volcano, use=None):
-    vals = {}
-    for starting in [i.name for i in current_volcano.pipes if i.flow_rate != 0 or i.name == 'AA']:
-        distances = {i:j for i,j in current_volcano.set_distances(starting).items() if current_volcano.pipe_dict[i].flow_rate != 0 and starting != i}
-        distances = {i: j for i, j in distances.items() if j <= min(distances.values()) + 1}
-        print(starting)
-        print(distances)
-        for i,j in distances.items():
-            rate = current_volcano.pipe_dict[i].flow_rate
-            rate /= 2 if j > min(distances.values()) else 1
-            if rate == max(current_volcano.pipe_dict[i].flow_rate for i,j in distances.items()):
-                print(i, current_volcano.pipe_dict[i].flow_rate)
-        '''for target in [i.name for i in current_volcano.pipes if i.flow_rate != 0 and i.name != starting]:
-            vals[target] = (find_final_pressure('AA', current_volcano, (starting,target)) - find_final_pressure('AA', current_volcano, tuple([starting]))) / distances[target]
-            print(target, vals[target])'''
-        print()
 
 if __name__ == '__main__':
-    pipes = interpret_file('test16.txt')
+    pipes = interpret_file('input16.txt')
     v = Volcano(pipes)
 
-    use = attempt_3('AA', v)
+    use = graphical_attempt('AA', v)
     print(use)
     score = find_final_pressure('AA', v, tuple(use))
     print(score)
-    funny_idea(v)
-    print(brute('AA', v))
 
 # 2058, 2203 too low, 2396 too high not 2228 not 2257 not 1950
 
