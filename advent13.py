@@ -88,7 +88,7 @@ while part1:
     count += 1
 print(results)
 
-results = [i[0] for i in results.items() if i[1] is True]
+results = [i[0] for i in results.items() if i[1]]
 print(results)
 print(sum(results))
 f = sort(f + [[[2]], [[6]]])
